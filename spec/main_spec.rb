@@ -8,6 +8,7 @@ describe GameRound do
     
       it 'creates a new, empty game board' do
         board = game.board
+        expect(board).to be_an_instance_of(GameBoard)
       end
       
       it 'creates an instance of Player called player1' do
@@ -21,7 +22,7 @@ describe GameRound do
       end
 
       it 'sets player1 as the active_player' do
-        expect(game.active_player).to be(player1)
+        expect(game.active_player).to be(game.player1)
       end
    
   end
@@ -34,12 +35,16 @@ describe GameRound do
     subject(:game) { described_class.new }
     context 'active_player is currently Player 1' do
       it "updates active_player from Player 1 to Player 2" do
+        player1 = game.player1
+        player2 = game.player2
         expect { game.switch_active_player }.to change { game.active_player}.from(player1).to(player2)
         game.switch_active_player
       end
     end
     context 'active_player is currently Player 2' do
       it 'changes active_player from Player 2 to Player 1' do
+        player1 = game.player1
+        player2 = game.player2
         game.active_player = player2
         expect { game.switch_active_player }.to change { game.active_player }.from(player2).to(player1)
         game.switch_active_player

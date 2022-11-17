@@ -10,24 +10,158 @@ describe GameBoard do
   #   end
   # end
 
+  describe "current_row" do
+    subject(:board) { described_class.new }
+    context 'when column is empty' do 
+      it 'returns 5' do
+        expect(board.current_row(0)).to eq(5)
+      end
+    end
+    context 'when there are two occupied row in the column' do
+      it 'returns 3' do
+        board.grid[5][0] = "|X|"
+        board.grid[4][0] ="|O|"
+        expect(board.current_row(0)).to eq(3)
+      end
+    end
+    context 'the first 5 rows of the column are occupied' do
+      it 'returns 0' do
+        (1..5).each do |row|
+          board.grid[row][0] = "|X|"
+        end
+        expect(board.current_row(0)).to eq(0)
+      end
+    end
+  
+  end
+
   describe 'update_board' do
     subject(:board) { described_class.new }
+    let(:game) { instance_double('gameround') }
     context 'when the board is empty and player chooses column[0]' do
-      it 'updates the value at grid[0][-1] to be equal to [X]' do
-        board.grid.update_board(0,-1,'|X|') 
-        expect(board.grid[-1][0]).to eq("|X|")
+      it 'updates the value at grid[-1][0] to be equal to |X|' do
+        expect { board.update_board(5,0,"|X|") }.to change { board.grid[-1][0] }.from("| |").to("|X|")
+      end
+    end
+    context 'when the selected column has two occupied rows' do
+      it 'updates the value at grid[3][0] to be "|X|' do
+        board.grid[-1][0] = "|X|"
+        board.grid[-2][0] = "|O|"
+        expect { board.update_board(5,0,"|X|") }.to change { board.grid[-3][0] }.from("| |").to("|X|")
       end
     end
   end
 
-  # describe 'full?' do
-  # end
+  describe 'choose_column' do
+    subject(:board) { described_class.new }
+    let(:player) { instance_double('player', piece: "|X|") }
+    context 'when the board is empty' do
+      it 'sends the selected column to #current_row' do
+        column = 0
+        expect(board).to receive(:current_row).with(column).once
+        board.current_row(column)
+      end
+      it 'calls #update_board' do
+        column = 0
+        allow(board).to receive(:current_row).and_return(5)
+        expect(board).to receive(:update_board).with(5,0,"|X|").once
+        board.choose_column(column, player)
+      end
+    end
+    context 'when the column is full' do
+      it 'raises a StandardError' do
+        column = 0
+        board.grid[5][column] = "|O|"
+        board.grid[4][column] = "|X|"
+        board.grid[3][column] = "|O|"
+        board.grid[2][column] = "|X|"
+        board.grid[1][column] = "|O|"
+        board.grid[0][column] = "|X|"
+        board.display_board
+        #allow(board).to receive(:full?).and_return(true)
+        expect { board.choose_column(column, player) }.to raise_error(StandardError)
+        #board.choose_column(column, player)
+      end
+    end
+  end
 
-  # describe 'winner?' do 
-  # end
+  describe 'full?' do 
+    subject(:board) { described_class.new }
+    let(:player) { instance_double('player', piece: "|X|")}
+    context 'when the selected column is not full' do
+      it 'returns false' do
+        column = 0
+        expect(board).to receive(:full?).and_return(false)
+        board.full?(column)
+      end
+    end
+    context 'when the selected column is full' do 
+      it 'returns true' do
+        column = 0
+        board.grid[5][column] = "|O|"
+        board.grid[4][column] = "|X|"
+        board.grid[3][column] = "|O|"
+        board.grid[2][column] = "|X|"
+        board.grid[1][column] = "|O|"
+        board.grid[0][column] = "|X|"
+        expect(board).to receive(:full?).and_return(true)
+        board.full?(column)
+      end
+    end
+  end
 
-  # describe check_verticals do 
-  # end
+  describe 'winner?' do
+    subject(:board) { described_class.new }
+    context 'when none of the win conditions have been met' do
+      it 'returns false' do
+        allow(board).to receive(:check_verticals).and_return(false)
+        allow(board).to receive(:check_horizontals).and_return(false)
+        allow(board).to receive(:check_diagonals).and_return(false)
+        expect(board).to receive(:winner?).and_return(false)
+        board.winner?
+      end
+    end
+    context 'when at least one of the win conditions has been met' do
+      it 'returns true' do
+        allow(board).to receive(:check_verticals).and_return(false)
+        allow(board).to receive(:check_horizontals).and_return(false)
+        allow(board).to receive(:check_diagonals).and_return(true)
+        expect(board).to receive(:winner?).and_return(true)
+        board.winner?
+      end
+    end
+  end
+
+  describe 'check verticals' do
+    context 'when there is no vertical sequence of 4 matching symbols' do
+      subject(:board) { described_class.new }
+      it 'returns false' do
+        column = 0
+        board.grid[5][column] = "|O|"
+        board.grid[4][column] = "|X|"
+        board.grid[3][column] = "|O|"
+        board.grid[2][column] = "|X|"
+        board.grid[1][column] = "|O|"
+        board.grid[0][column] = "|X|"
+        expect(board.check_verticals("|X|")).to be(false)
+        #board.check_verticals
+      end
+    end
+    context 'when there exists a vertical sequence of 4 matching symbols' do
+      subject(:board) { described_class.new }
+      it 'returns true' do
+        column = 0
+        board.grid[5][column] = "|O|"
+        board.grid[4][column] = "|X|"
+        board.grid[3][column] = "|X|"
+        board.grid[2][column] = "|X|"
+        board.grid[1][column] = "|X|"
+        board.grid[0][column] = "|O|"
+        expect(board.check_verticals("|X|")).to be(true)
+        #board.check_verticals
+      end
+    end  
+  end
 
   # describe check_horizontals do 
   # end

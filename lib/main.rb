@@ -8,7 +8,7 @@ class GameRound
     @player1 = Player.new('Player 1', '|X|')
     @player2 = Player.new('Player 2', '|O|')
     @active_player = @player1
-    self.game_loop
+    #self.game_loop
   end
   
   #Game loop
@@ -34,6 +34,7 @@ round = GameRound.new
 # round.board.update_board(-1,0,"[O]")
 
 round.board.choose_column(0,round.player1)
-round.board.choose_column(0,round.player2)
 round.board.choose_column(0,round.player1)
-round.board.choose_column(0,round.player2)
+round.board.choose_column(0,round.player1)
+round.board.choose_column(0,round.player1)
+p round.board.check_verticals
