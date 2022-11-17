@@ -110,6 +110,29 @@ describe GameBoard do
     end
   end
 
+  describe 'all_spaces_full?' do
+    context 'when the entire board is not full' do
+      subject(:board) { described_class.new }
+      it 'returns false' do
+        expect(board.all_spaces_full?).to be(false)
+      end
+    end
+    context 'when the entire board is full' do
+      subject(:board2) { described_class.new }
+      before do
+        (0..5).each do |row|
+          (0..6).each do |col|
+            board2.grid[row][col] = "|O|"
+          end
+        end
+      end
+        it 'returns true' do
+          expect(board2.all_spaces_full?).to be(true)
+        end
+      end
+  end
+
+
   describe 'winner?' do
     subject(:board) { described_class.new }
     context 'when none of the win conditions have been met' do

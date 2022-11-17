@@ -45,7 +45,17 @@ class GameBoard
   end
 
   def full?(column)
-    @grid[0][column] != "| |"
+    @grid[0][column] == "|X|" || @grid[0][column] == "|O|"
+  end
+
+  def all_spaces_full?
+    columns = (0..6).to_a
+    columns.all? {|column| full?(column) }
+  end
+
+  def tie_game
+    puts "All spaces have been filled. It's a draw!"
+    exit
   end
 
   def winner?(piece)
