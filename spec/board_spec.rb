@@ -117,8 +117,7 @@ describe GameBoard do
         allow(board).to receive(:check_verticals).and_return(false)
         allow(board).to receive(:check_horizontals).and_return(false)
         allow(board).to receive(:check_diagonals).and_return(false)
-        expect(board).to receive(:winner?).and_return(false)
-        board.winner?
+        expect(board.winner?("|X|")).to be(false)
       end
     end
     context 'when at least one of the win conditions has been met' do
@@ -126,8 +125,7 @@ describe GameBoard do
         allow(board).to receive(:check_verticals).and_return(false)
         allow(board).to receive(:check_horizontals).and_return(false)
         allow(board).to receive(:check_diagonals).and_return(true)
-        expect(board).to receive(:winner?).and_return(true)
-        board.winner?
+        expect(board.winner?("|X|")).to be(true)
       end
     end
   end
@@ -163,16 +161,123 @@ describe GameBoard do
     end  
   end
 
-  # describe check_horizontals do 
-  # end
+  describe 'check_horizontals' do
+    context 'when there is no horizontal sequence of 4 matching symbols' do
+      subject(:board) { described_class.new }
+      it 'returns false' do
+        row = 5
+        board.grid[row][0] = "|O|"
+        board.grid[row][1] = "|X|"
+        board.grid[row][2] = "|X|"
+        board.grid[row][3] = "|O|"
+        board.grid[row][4] = "|X|"
+        board.grid[row][5] = "|O|"
+        expect(board.check_horizontals("|X|")).to be (false)
+      end
+    end
+    context 'when there exists a horizontal sequence of 4 matching symbols' do
+      subject(:board) { described_class.new }
+      it 'returns true' do
+        row = 5
+        board.grid[row][0] = "|O|"
+        board.grid[row][1] = "|X|"
+        board.grid[row][2] = "|X|"
+        board.grid[row][3] = "|X|"
+        board.grid[row][4] = "|X|"
+        board.grid[row][5] = "|O|"
+        expect(board.check_horizontals("|X|")).to be(true)
+      end
+    end
 
-  # describe check_diagonals do 
-  # end
+  end
 
-  # describe check check_right_diagonal do
-  # end
+  describe 'check_diagonals' do
+    context 'there is no diagonal sequence of 4 matching symbols' do
+      subject(:board) { described_class.new }
+      it 'returns false' do
+        allow(board).to receive(:check_left_diagonal).and_return(false)
+        allow(board).to receive(:check_right_diagonal).and_return(false)
+        expect(board.check_diagonals("|X|")).to be(false)
+      end
+    end
+    context 'there exists a diagonal sequence of 4 matching symbols' do
+      subject(:board) { described_class.new }
+      it 'returns true' do
+        allow(board).to receive(:check_left_diagonal).and_return(false)
+        allow(board).to receive(:check_right_diagonal).and_return(true)
+        expect(board.check_diagonals("|X|")).to be(true)
+      end
+    end
+  end
 
-  # describe check_left_diagonal do 
-  # end
+  describe 'check_right_diagonal' do
+    context 'there is no sequence of 4 matching characters in a left-to-right upwards diagonal' do
+      subject(:board) { described_class.new }
+      it 'returns false' do
+        board.grid[5][0] = "|O|"
+        board.grid[4][1] = "|X|"
+        board.grid[3][2] = "|X|"
+        board.grid[2][3] = "|O|"
+        board.grid[1][4] = "|X|"
+        board.grid[0][5] = "|O|"
+        expect(board.check_right_diagonal("|X|")).to be(false)
+      end
+    end
+    context 'there exists a sequence of 4 matching characters in a left-to-right upwards diagonal' do
+      subject(:board) { described_class.new }
+      before do
+        (0..5).each do |row|
+          (0..6).each do |col|
+            board.grid[row][col] = "|O|"
+          end
+        end
+      end
+      
+      it 'returns true' do
+
+        board.grid[5][0] = "|O|"
+        board.grid[4][1] = "|X|"
+        board.grid[3][2] = "|X|"
+        board.grid[2][3] = "|X|"
+        board.grid[1][4] = "|X|"
+        board.grid[0][5] = "|O|"
+        expect(board.check_right_diagonal("|X|")).to be(true)
+      end
+    end
+  end
+
+  describe 'check_left_diagonal' do 
+    context 'there is no sequence of 4 matching characters in a left-to-right downwards diagonal' do
+      subject(:board) { described_class.new }
+      it 'returns false' do
+        board.grid[0][0] = "|O|"
+        board.grid[1][1] = "|X|"
+        board.grid[2][2] = "|X|"
+        board.grid[3][3] = "|O|"
+        board.grid[4][4] = "|X|"
+        board.grid[5][5] = "|O|"
+        expect(board.check_left_diagonal("|X|")).to be(false)
+      end
+    end
+    context 'there exists a sequence of 4 matching characters in a left-to-right downwards diagonal' do
+      subject(:board) { described_class.new }
+      before do
+        (0..5).each do |row|
+          (0..6).each do |col|
+            board.grid[row][col] = "|O|"
+          end
+        end
+      end
+      it 'returns true' do
+        board.grid[0][0] = "|O|"
+        board.grid[1][1] = "|X|"
+        board.grid[2][2] = "|X|"
+        board.grid[3][3] = "|X|"
+        board.grid[4][4] = "|X|"
+        board.grid[5][5] = "|O|"
+        expect(board.check_left_diagonal("|X|")).to be(true)
+      end
+    end
+  end
   
 end

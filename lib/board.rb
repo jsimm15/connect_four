@@ -48,8 +48,8 @@ class GameBoard
     @grid[0][column] != "| |"
   end
 
-  def winner?
-    check_verticals || check_horizontals || check_diagonals
+  def winner?(piece)
+    check_verticals(piece) || check_horizontals(piece) || check_diagonals(piece)
   end
 
   def check_verticals(piece)
@@ -85,22 +85,66 @@ class GameBoard
     return false
   end
 
-  def check_horizontals
-    # matcher = ""
-    # count = 0
-    # [0..5].each do |row|
-    #   [0..6] do |column|
-    #     if column == 0
-    #       matcher 
+  def check_horizontals(piece)
+    row = 0
+    columns = [0, 1, 2, 3]
+
+    while row < 6 do
+      return true if columns.all? { |column| @grid[row][column] == piece }
+
+      columns.map! { |column| column += 1 }
+
+      if columns[-1] == 7
+        row += 1
+        columns = [0, 1, 2, 3]
+      end
+    end
+    return false
   end
 
-  def check_diagonals
+  def check_diagonals(piece)
+    check_left_diagonal(piece) || check_right_diagonal(piece)
   end
 
-  # def check_right_diagonal
-  # end
+  def check_right_diagonal(piece)
+    rows = [5, 4, 3, 2]
+    columns = [0, 1, 2, 3]
+    shift = 0
 
-  # def check_left_diagonal
-  # end
+    while rows[-1] >= 0 && columns[-1] < 7 do
+      return true if rows.all? { |row| @grid[row][5 - row - shift] == piece} 
+      #&& columns.all? { |column| @grid[5 - column][column] == piece}
 
+      columns.map! { |column| column += 1 }
+      shift -= 1
+
+      if columns[-1] == 7
+        rows.map! { |row|  row -= 1 }
+        columns = [0, 1, 2, 3]
+        shift = 5 - rows[0]
+      end
+    end
+    return false
+  end
+
+  def check_left_diagonal(piece)
+    rows = [0, 1, 2, 3]
+    columns = [0, 1, 2, 3]
+    shift = 0
+
+    while rows[-1] < 6 && columns[-1] < 7 do
+      return true if rows.all? { |row| @grid[row][row - shift] == piece} 
+      #&& columns.all? { |column| @grid[5 - column][column] == piece}
+
+      columns.map! { |column| column += 1 }
+      shift -= 1
+
+      if columns[-1] == 7
+        rows.map! { |row|  row += 1 }
+        columns = [0, 1, 2, 3]
+        shift = rows[0]
+      end
+    end
+    return false
+  end
 end
