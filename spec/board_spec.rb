@@ -2,52 +2,19 @@ require './lib/board.rb'
 
 describe GameBoard do
 
-  # describe display_board do
-  #   context 'when creating a new board' do 
-  #     it 'displays a grid of 6 rows, 7 columns, with marked by "|"' do
-  #       expect
-  #     end
-  #   end
-  # end
-
-  describe "current_row" do
-    subject(:board) { described_class.new }
-    context 'when column is empty' do 
-      it 'returns 5' do
-        expect(board.current_row(0)).to eq(5)
-      end
-    end
-    context 'when there are two occupied row in the column' do
-      it 'returns 3' do
-        board.grid[5][0] = "|X|"
-        board.grid[4][0] ="|O|"
-        expect(board.current_row(0)).to eq(3)
-      end
-    end
-    context 'the first 5 rows of the column are occupied' do
-      it 'returns 0' do
-        (1..5).each do |row|
-          board.grid[row][0] = "|X|"
-        end
-        expect(board.current_row(0)).to eq(0)
-      end
-    end
-  
-  end
-
   describe 'update_board' do
     subject(:board) { described_class.new }
     let(:game) { instance_double('gameround') }
     context 'when the board is empty and player chooses column[0]' do
       it 'updates the value at grid[-1][0] to be equal to |X|' do
-        expect { board.update_board(5,0,"|X|") }.to change { board.grid[-1][0] }.from("| |").to("|X|")
+        expect { board.update_board(0,"|X|") }.to change { board.grid[-1][0] }.from("| |").to("|X|")
       end
     end
     context 'when the selected column has two occupied rows' do
       it 'updates the value at grid[3][0] to be "|X|' do
         board.grid[-1][0] = "|X|"
         board.grid[-2][0] = "|O|"
-        expect { board.update_board(5,0,"|X|") }.to change { board.grid[-3][0] }.from("| |").to("|X|")
+        expect { board.update_board(0,"|X|") }.to change { board.grid[-3][0] }.from("| |").to("|X|")
       end
     end
   end
@@ -56,15 +23,9 @@ describe GameBoard do
     subject(:board) { described_class.new }
     let(:player) { instance_double('player', piece: "|X|") }
     context 'when the board is empty' do
-      it 'sends the selected column to #current_row' do
-        column = 0
-        expect(board).to receive(:current_row).with(column).once
-        board.current_row(column)
-      end
       it 'calls #update_board' do
         column = 0
-        allow(board).to receive(:current_row).and_return(5)
-        expect(board).to receive(:update_board).with(5,0,"|X|").once
+        expect(board).to receive(:update_board).with(0,"|X|").once
         board.choose_column(column, player)
       end
     end
@@ -78,9 +39,7 @@ describe GameBoard do
         board.grid[1][column] = "|O|"
         board.grid[0][column] = "|X|"
         board.display_board
-        #allow(board).to receive(:full?).and_return(true)
         expect { board.choose_column(column, player) }.to raise_error(StandardError)
-        #board.choose_column(column, player)
       end
     end
   end
@@ -95,6 +54,7 @@ describe GameBoard do
         board.full?(column)
       end
     end
+
     context 'when the selected column is full' do 
       it 'returns true' do
         column = 0
@@ -129,9 +89,8 @@ describe GameBoard do
         it 'returns true' do
           expect(board2.all_spaces_full?).to be(true)
         end
-      end
+    end
   end
-
 
   describe 'winner?' do
     subject(:board) { described_class.new }
@@ -165,7 +124,6 @@ describe GameBoard do
         board.grid[1][column] = "|O|"
         board.grid[0][column] = "|X|"
         expect(board.check_verticals("|X|")).to be(false)
-        #board.check_verticals
       end
     end
     context 'when there exists a vertical sequence of 4 matching symbols' do
@@ -179,7 +137,6 @@ describe GameBoard do
         board.grid[1][column] = "|X|"
         board.grid[0][column] = "|O|"
         expect(board.check_verticals("|X|")).to be(true)
-        #board.check_verticals
       end
     end  
   end
@@ -211,7 +168,6 @@ describe GameBoard do
         expect(board.check_horizontals("|X|")).to be(true)
       end
     end
-
   end
 
   describe 'check_diagonals' do
@@ -255,9 +211,7 @@ describe GameBoard do
           end
         end
       end
-      
       it 'returns true' do
-
         board.grid[5][0] = "|O|"
         board.grid[4][1] = "|X|"
         board.grid[3][2] = "|X|"
